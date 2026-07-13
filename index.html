@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>For You ♥</title>
+
+<!-- ═══════════════════════════════════════════════════════
+     EDIT KORAR JONNO:
+     Nichey <script id="config"> section e shob lekha ache —
+     naam, boro message, ar chirkut gulor lekha.
+     Photo bodlate: "photos" list e nijer chhobir file naam
+     dao (jemon "amader-chhobi.jpg") — chhobi gulo ei HTML
+     file er pashe ekta "images" folder e rakho.
+     ═══════════════════════════════════════════════════════ -->
+
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,wght@0,400;0,600;1,500&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg1:#ffe9f0; --bg2:#ffd6e3;
+  --rose:#e0527d; --deep:#8c2f4d;
+  --paper:#fffdf6; --tape:rgba(255,214,140,.75);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  background:
+    radial-gradient(circle at 20% 15%, #fff3f7 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, #ffd0e0 0%, transparent 50%),
+    linear-gradient(160deg, var(--bg1), var(--bg2));
+  font-family:'Jost',sans-serif;
+  position:relative;
+  touch-action:none;
+}
+
+/* floating hearts */
+.heart{
+  position:absolute;bottom:-30px;color:#f6a9c3;pointer-events:none;
+  animation:up linear infinite;opacity:.7;z-index:0;
+}
+@keyframes up{
+  from{transform:translateY(0) rotate(0deg)}
+  to{transform:translateY(-115vh) rotate(35deg)}
+}
+
+/* ── center message (revealed underneath) ── */
+.center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  z-index:1;padding:24px;pointer-events:none;
+}
+.center .small{
+  font-family:'Caveat',cursive;font-size:clamp(1.4rem,4.5vw,2rem);
+  color:var(--deep);opacity:.85;
+}
+.center h1{
+  font-family:'Fraunces',serif;font-weight:600;
+  font-size:clamp(2.4rem,9vw,5rem);line-height:1.05;
+  color:var(--rose);letter-spacing:-.01em;margin:10px 0 6px;
+}
+.center h1 em{font-style:italic;font-weight:500;color:var(--deep)}
+.center .big-heart{
+  font-size:clamp(2.4rem,7vw,3.6rem);
+  animation:beat 1.3s ease-in-out infinite;display:inline-block;margin-top:8px;
+}
+@keyframes beat{0%,100%{transform:scale(1)}12%{transform:scale(1.22)}24%{transform:scale(1)}36%{transform:scale(1.14)}}
+.center .msg{
+  margin-top:14px;max-width:480px;color:#7c4258;
+  font-size:clamp(.95rem,3vw,1.1rem);line-height:1.7;
+}
+
+/* ── draggable papers ── */
+.paper{
+  position:absolute;z-index:2;cursor:grab;user-select:none;
+  -webkit-user-drag:none;
+  filter:drop-shadow(0 10px 18px rgba(140,47,77,.22));
+  transition:filter .2s;
+  will-change:transform;
+}
+.paper:active{cursor:grabbing}
+.paper.lift{filter:drop-shadow(0 22px 30px rgba(140,47,77,.35));z-index:10}
+
+.note{
+  background:var(--paper);
+  width:min(56vw,230px);
+  padding:26px 20px 22px;border-radius:4px;
+  font-family:'Caveat',cursive;font-weight:600;
+  font-size:clamp(1.25rem,4.5vw,1.7rem);
+  line-height:1.35;color:#5c3040;text-align:center;
+}
+.note::before{ /* tape */
+  content:'';position:absolute;top:-11px;left:50%;
+  transform:translateX(-50%) rotate(-3deg);
+  width:74px;height:24px;background:var(--tape);
+  border-left:1px dashed rgba(0,0,0,.08);
+  border-right:1px dashed rgba(0,0,0,.08);
+}
+.note.pink{background:#fff0f5}
+.note.yellow{background:#fffbe8}
+.note.blue{background:#eef7ff}
+
+.photo{
+  background:#fff;padding:12px 12px 40px;border-radius:3px;
+  width:min(58vw,220px);text-align:center;
+}
+.photo::before{
+  content:'';position:absolute;top:-11px;left:50%;
+  transform:translateX(-50%) rotate(2deg);
+  width:74px;height:24px;background:var(--tape);
+}
+.photo .ph{
+  width:100%;aspect-ratio:1/1.05;border-radius:2px;overflow:hidden;
+  background:linear-gradient(150deg,#ffd9e6,#ffc3d6);
+  display:flex;align-items:center;justify-content:center;
+  color:#c96e8e;font-family:'Caveat',cursive;font-size:1.3rem;
+}
+.photo .ph img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.photo .cap{
+  margin-top:12px;font-family:'Caveat',cursive;font-weight:600;
+  font-size:1.35rem;color:#5c3040;position:absolute;left:0;right:0;bottom:9px;
+}
+
+/* drag hint */
+.hint{
+  position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+  z-index:20;background:rgba(140,47,77,.9);color:#fff;
+  font-size:.85rem;letter-spacing:.06em;
+  padding:10px 20px;border-radius:100px;
+  animation:pulse 2s ease-in-out infinite;pointer-events:none;
+  white-space:nowrap;
+}
+@keyframes pulse{0%,100%{opacity:.92}50%{opacity:.55}}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ EDIT EKHANE ═══════════ -->
+<script id="config" type="application/json">
+{
+  "name": "Pallabi",
+  "centerSmall": "Today is your day my dear…",
+  "centerBig": "Happy Birthday",
+  "centerMsg": "Khub choto ekta gift tomar jonno. Bhalo theko, khusi theko sob somoy tomar pase achi, I love you Babai. ♥",
+  "notes": [
+    "You're my favourite forever 💛",
+    "You're the reason of my smile 😍",
+    "Tomay ami onek valobashi amar artist bou🥰",
+    "Every version of me loves every version of you 🥹",
+    "I Love You Soooo Much ❤️"
+  ],
+  "photos": [
+    {"src": "image1.jpeg", "caption": "Memories♥"},
+    {"src": "image2.jpeg", "caption": "hum aur tum 🥰"},
+    {"src": "image3.jpeg", "caption": "🤍"}
+  ]
+}
+</script>
+<div class="center" id="center">
+  <div class="small" id="cSmall"></div>
+  <h1 id="cBig"></h1>
+  <h1><em id="cName"></em></h1>
+  <span class="big-heart">❤️</span>
+  <p class="msg" id="cMsg"></p>
+</div>
+
+<div class="hint" id="hint">✋ Kagoj gulo sorao!</div>
+
+<script>
+const cfg = JSON.parse(document.getElementById('config').textContent);
+document.getElementById('cSmall').textContent = cfg.centerSmall;
+document.getElementById('cBig').textContent = cfg.centerBig;
+document.getElementById('cName').textContent = cfg.name + ' ♥';
+document.getElementById('cMsg').textContent = cfg.centerMsg;
+
+/* floating hearts */
+for(let i=0;i<12;i++){
+  const h=document.createElement('div');h.className='heart';
+  h.textContent=['♥','❤','💗','♡'][i%4];
+  h.style.left=Math.random()*100+'%';
+  h.style.fontSize=(12+Math.random()*20)+'px';
+  h.style.animationDuration=(9+Math.random()*10)+'s';
+  h.style.animationDelay=(-Math.random()*15)+'s';
+  document.body.appendChild(h);
+}
+
+/* build papers: interleave notes & photos, scattered over center */
+const noteColors=['pink','yellow','','blue',''];
+const papers=[];
+cfg.notes.forEach((t,i)=>{
+  const d=document.createElement('div');
+  d.className='paper note '+(noteColors[i%noteColors.length]||'');
+  d.innerHTML=t;
+  papers.push(d);
+});
+cfg.photos.forEach(p=>{
+  const d=document.createElement('div');
+  d.className='paper photo';
+  d.innerHTML='<div class="ph">'+(p.src?'<img src="'+p.src+'" alt="">':'📷 chhobi ekhane')+'</div><div class="cap">'+p.caption+'</div>';
+  papers.push(d);
+});
+
+/* shuffle so notes & photos mix in stacking order */
+papers.sort(()=>Math.random()-0.5);
+
+const W=()=>innerWidth, H=()=>innerHeight;
+papers.forEach((el,i)=>{
+  document.body.appendChild(el);
+  // cluster around center with spread
+  const cx=W()/2, cy=H()/2;
+  const ang=(i/papers.length)*Math.PI*2 + Math.random()*0.9;
+  const rad=Math.min(W(),H())*0.14*Math.random()+20;
+  const x=cx+Math.cos(ang)*rad - el.offsetWidth/2 + (Math.random()*60-30);
+  const y=cy+Math.sin(ang)*rad - el.offsetHeight/2 + (Math.random()*60-30);
+  el.dataset.x=x; el.dataset.y=y;
+  el.dataset.rot=(Math.random()*22-11);
+  place(el);
+});
+function place(el){
+  el.style.transform='translate('+el.dataset.x+'px,'+el.dataset.y+'px) rotate('+el.dataset.rot+'deg)';
+}
+
+/* drag logic (pointer events = mouse + touch) */
+let drag=null, ox=0, oy=0, topZ=10, moved=false;
+document.addEventListener('pointerdown',e=>{
+  const p=e.target.closest('.paper');
+  if(!p)return;
+  drag=p; moved=false;
+  ox=e.clientX-parseFloat(p.dataset.x);
+  oy=e.clientY-parseFloat(p.dataset.y);
+  p.classList.add('lift');
+  p.style.zIndex=++topZ;
+  p.setPointerCapture(e.pointerId);
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  moved=true;
+  drag.dataset.x=e.clientX-ox;
+  drag.dataset.y=e.clientY-oy;
+  place(drag);
+});
+document.addEventListener('pointerup',()=>{
+  if(!drag)return;
+  drag.classList.remove('lift');
+  drag=null;
+  if(moved) hideHint();
+});
+let hintHidden=false;
+function hideHint(){
+  if(hintHidden)return;hintHidden=true;
+  const h=document.getElementById('hint');
+  h.style.transition='opacity 1s';h.style.opacity='0';
+  setTimeout(()=>h.remove(),1100);
+}
+</script>
+</body>
+</html>
